@@ -23,7 +23,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
     // Kotlin Modules
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -32,7 +31,6 @@ dependencies {
 
     // Database & Flyway
     implementation("org.postgresql:postgresql")
-    implementation("org.hibernate.orm:hibernate-spatial")
     implementation("org.flywaydb:flyway-core")
     runtimeOnly("com.h2database:h2")
 

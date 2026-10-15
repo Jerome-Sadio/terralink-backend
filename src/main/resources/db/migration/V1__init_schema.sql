@@ -1,6 +1,4 @@
 -- Terra-Link Database Schema Migration V1
-CREATE EXTENSION IF NOT EXISTS postgis;
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 1. Users Table
 CREATE TABLE users (
@@ -20,7 +18,6 @@ CREATE TABLE farms (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(150) NOT NULL,
-    location GEOMETRY(Point, 4326),
     address TEXT NOT NULL,
     size_hectares NUMERIC(10, 2) NOT NULL DEFAULT 0.0,
     type VARCHAR(50) NOT NULL, -- 'AGRICULTURE', 'ELEVAGE', 'MIXTE'
@@ -87,8 +84,7 @@ CREATE TABLE notifications (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Spatial and Performance Indexes
-CREATE INDEX idx_farms_location ON farms USING GIST (location);
+-- Performance Indexes
 CREATE INDEX idx_farms_owner ON farms(owner_id);
 CREATE INDEX idx_assignments_farm ON controller_assignments(farm_id);
 CREATE INDEX idx_assignments_controller ON controller_assignments(controller_id);
