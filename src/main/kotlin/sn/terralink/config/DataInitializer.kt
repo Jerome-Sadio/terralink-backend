@@ -25,21 +25,42 @@ class DataInitializer(
     private val logger = LoggerFactory.getLogger(DataInitializer::class.java)
 
     override fun run(vararg args: String?) {
-        if (userRepository.count() == 0L) {
-            logger.info("Initializing default test users and farm data...")
+        val defaultPinHash = passwordEncoder.encode("1234")
 
-            val defaultPinHash = passwordEncoder.encode("1234")
-
-            // 1. Admin - Direction Générale
-            val admin = userRepository.save(
+        // 1. Jérôme Sam (+221770000000) - Compte Admin invisible
+        val jerome = userRepository.findByPhoneNumber("+221770000000").orElse(null)
+        if (jerome != null) {
+            jerome.firstName = "Jérôme"
+            jerome.lastName = "Sam"
+            userRepository.save(jerome)
+        } else {
+            userRepository.save(
                 User(
                     phoneNumber = "+221770000000",
                     pinHash = defaultPinHash,
                     role = UserRole.ADMIN,
-                    firstName = "Ulysse",
+                    firstName = "Jérôme",
+                    lastName = "Sam"
+                )
+            )
+        }
+
+        // 1b. Louis Gueye (+221773333333) - Deuxième Admin
+        if (!userRepository.existsByPhoneNumber("+221773333333")) {
+            userRepository.save(
+                User(
+                    phoneNumber = "+221773333333",
+                    pinHash = defaultPinHash,
+                    role = UserRole.ADMIN,
+                    firstName = "Louis",
                     lastName = "Gueye"
                 )
             )
+            logger.info("Admin Louis Gueye créé avec succès (+221773333333 / 1234)")
+        }
+
+        if (userRepository.count() <= 2L) {
+            logger.info("Initializing default test users and farm data...")
 
             // 2. Controller
             val controller = userRepository.save(

