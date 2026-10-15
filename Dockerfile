@@ -3,7 +3,7 @@ WORKDIR /app
 
 RUN mkdir -p /app/uploads/inspections
 
-COPY build/libs/terralink-0.0.1-SNAPSHOT.jar app.jar
+COPY build/libs/*-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 
