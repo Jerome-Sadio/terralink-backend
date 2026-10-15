@@ -21,12 +21,13 @@ class UserService(
 ) {
     @Transactional
     fun createUser(request: CreateUserRequest): UserResponse {
-        if (userRepository.existsByPhoneNumber(request.phoneNumber)) {
-            throw IllegalArgumentException("Un utilisateur existe déjà avec ce numéro de téléphone")
+        val cleanPhone = AuthService.normalizePhoneNumber(request.phoneNumber)
+        if (userRepository.existsByPhoneNumber(cleanPhone)) {
+            throw IllegalArgumentException("Un utilisateur existe déjà avec ce numéro de téléphone ($cleanPhone)")
         }
 
         val newUser = User(
-            phoneNumber = request.phoneNumber,
+            phoneNumber = cleanPhone,
             pinHash = passwordEncoder.encode(request.pin),
             role = request.role,
             firstName = request.firstName,

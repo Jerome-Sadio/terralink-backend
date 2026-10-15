@@ -70,6 +70,16 @@ class DataInitializer(
             logger.info("Admin Ulysse Gueye configuré avec succès (+221778605182 / 1234)")
         }
 
+        // Nettoyer et normaliser tous les numéros existants en base de données
+        userRepository.findAll().forEach { u ->
+            val clean = sn.terralink.service.AuthService.normalizePhoneNumber(u.phoneNumber)
+            if (clean != u.phoneNumber) {
+                logger.info("Normalisation numéro pour ${u.firstName} ${u.lastName}: '${u.phoneNumber}' -> '$clean'")
+                u.phoneNumber = clean
+                userRepository.save(u)
+            }
+        }
+
         if (userRepository.count() <= 2L) {
             logger.info("Initializing default test users and farm data...")
 

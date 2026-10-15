@@ -18,18 +18,35 @@ class AuthService(
 ) {
     private val logger = LoggerFactory.getLogger(AuthService::class.java)
 
+    companion object {
+        fun normalizePhoneNumber(phone: String): String {
+            val cleaned = phone.replace("[\\s\\-\\.\\(\\)]".toRegex(), "")
+            return if (cleaned.startsWith("+")) {
+                cleaned
+            } else if (cleaned.startsWith("00")) {
+                "+" + cleaned.substring(2)
+            } else {
+                "+221$cleaned"
+            }
+        }
+    }
+
     fun requestPinOtp(phoneNumber: String): Boolean {
-        val user = userRepository.findByPhoneNumber(phoneNumber)
+        val cleanPhone = normalizePhoneNumber(phoneNumber)
+        val user = userRepository.findByPhoneNumber(cleanPhone)
+            .or { userRepository.findByPhoneNumber(phoneNumber) }
             .orElseThrow { IllegalArgumentException("Utilisateur non trouvé pour ce numéro de téléphone") }
 
-        // In development / mock mode, we log the OTP pin check request
-        logger.info("OTP PIN requested for phone number: {}. Mock SMS sent.", phoneNumber)
+        logger.info("OTP PIN requested for phone number: {}. Mock SMS sent.", cleanPhone)
         return true
     }
 
     @Transactional(readOnly = true)
     fun verifyPinAndLogin(request: VerifyPinRequest): AuthResponse {
-        val user = userRepository.findByPhoneNumber(request.phoneNumber)
+        val cleanPhone = normalizePhoneNumber(request.phoneNumber)
+        val user = userRepository.findByPhoneNumber(cleanPhone)
+            .or { userRepository.findByPhoneNumber(request.phoneNumber) }
+            .or { userRepository.findByPhoneNumber(request.phoneNumber.trim().replace("\\s+".toRegex(), "")) }
             .orElseThrow { BadCredentialsException("Numéro de téléphone ou code PIN incorrect") }
 
         if (!passwordEncoder.matches(request.pin, user.pinHash)) {
