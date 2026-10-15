@@ -27,11 +27,11 @@ class DataInitializer(
     override fun run(vararg args: String?) {
         val defaultPinHash = passwordEncoder.encode("1234")
 
-        // 1. Jérôme Sam (+221770000000) - Compte Admin invisible
+        // 1. Jérôme San (+221770000000) - Compte Admin invisible
         val jerome = userRepository.findByPhoneNumber("+221770000000").orElse(null)
         if (jerome != null) {
             jerome.firstName = "Jérôme"
-            jerome.lastName = "Sam"
+            jerome.lastName = "San"
             userRepository.save(jerome)
         } else {
             userRepository.save(
@@ -40,23 +40,34 @@ class DataInitializer(
                     pinHash = defaultPinHash,
                     role = UserRole.ADMIN,
                     firstName = "Jérôme",
-                    lastName = "Sam"
+                    lastName = "San"
                 )
             )
         }
 
-        // 1b. Louis Gueye (+221773333333) - Deuxième Admin
-        if (!userRepository.existsByPhoneNumber("+221773333333")) {
+        // Nettoyage éventuel du numéro temporaire
+        userRepository.findByPhoneNumber("+221773333333").ifPresent {
+            userRepository.delete(it)
+        }
+
+        // 1b. Ulysse Gueye (+221778605182) - Admin principal
+        val ulysse = userRepository.findByPhoneNumber("+221778605182").orElse(null)
+        if (ulysse != null) {
+            ulysse.firstName = "Ulysse"
+            ulysse.lastName = "Gueye"
+            ulysse.role = UserRole.ADMIN
+            userRepository.save(ulysse)
+        } else {
             userRepository.save(
                 User(
-                    phoneNumber = "+221773333333",
+                    phoneNumber = "+221778605182",
                     pinHash = defaultPinHash,
                     role = UserRole.ADMIN,
-                    firstName = "Louis",
+                    firstName = "Ulysse",
                     lastName = "Gueye"
                 )
             )
-            logger.info("Admin Louis Gueye créé avec succès (+221773333333 / 1234)")
+            logger.info("Admin Ulysse Gueye configuré avec succès (+221778605182 / 1234)")
         }
 
         if (userRepository.count() <= 2L) {
