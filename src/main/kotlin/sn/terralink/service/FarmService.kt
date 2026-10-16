@@ -29,7 +29,9 @@ class FarmService(
             name = request.name,
             address = request.address,
             sizeHectares = request.sizeHectares,
-            type = request.type
+            type = request.type,
+            latitude = request.latitude,
+            longitude = request.longitude
         )
 
         val savedFarm = farmRepository.save(farm)
@@ -93,6 +95,8 @@ class FarmService(
         request.address?.let { farm.address = it }
         request.sizeHectares?.let { farm.sizeHectares = it }
         request.type?.let { farm.type = it }
+        request.latitude?.let { farm.latitude = it }
+        request.longitude?.let { farm.longitude = it }
 
         return mapToResponse(farmRepository.save(farm))
     }
@@ -123,7 +127,9 @@ class FarmService(
             type = farm.type,
             status = farm.status.name,
             assignedControllerId = activeAssignment?.controller?.id,
-            assignedControllerName = activeAssignment?.let { "${it.controller.firstName} ${it.controller.lastName}" }
+            assignedControllerName = activeAssignment?.let { "${it.controller.firstName} ${it.controller.lastName}" },
+            latitude = farm.latitude,
+            longitude = farm.longitude
         )
     }
 }

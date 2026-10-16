@@ -39,7 +39,9 @@ data class FarmResponse(
     val type: FarmType,
     val status: String,
     val assignedControllerId: UUID? = null,
-    val assignedControllerName: String? = null
+    val assignedControllerName: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )
 
 data class AssignControllerRequest(
@@ -106,7 +108,9 @@ data class UpdateFarmRequest(
     val name: String? = null,
     val address: String? = null,
     val sizeHectares: BigDecimal? = null,
-    val type: FarmType? = null
+    val type: FarmType? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )
 
 data class DashboardStats(

@@ -80,6 +80,27 @@ class DataInitializer(
             }
         }
 
+        // Initialiser ou compléter les coordonnées GPS de toutes les exploitations existantes
+        val defaultCoords = listOf(
+            Pair(14.8524, -17.1265), // Thiès / Niayes
+            Pair(14.7167, -17.4677), // Dakar
+            Pair(16.0326, -16.4818), // Saint-Louis
+            Pair(14.1378, -16.0758), // Kaolack
+            Pair(12.5833, -16.2719), // Ziguinchor
+            Pair(14.6561, -16.2319)  // Fatick
+        )
+        var coordIdx = 0
+        farmRepository.findAll().forEach { f ->
+            if (f.latitude == null || f.longitude == null) {
+                val coords = defaultCoords[coordIdx % defaultCoords.size]
+                f.latitude = coords.first
+                f.longitude = coords.second
+                farmRepository.save(f)
+                coordIdx++
+                logger.info("Coordonnées GPS assignées à la ferme '${f.name}': ${f.latitude}, ${f.longitude}")
+            }
+        }
+
         if (userRepository.count() <= 2L) {
             logger.info("Initializing default test users and farm data...")
 
@@ -112,7 +133,9 @@ class DataInitializer(
                     name = "Ferme Agricole de Niayes",
                     address = "Niayes, Région de Thiès, Sénégal",
                     sizeHectares = BigDecimal("15.5"),
-                    type = FarmType.AGRICULTURE
+                    type = FarmType.AGRICULTURE,
+                    latitude = 14.8524,
+                    longitude = -17.1265
                 )
             )
 

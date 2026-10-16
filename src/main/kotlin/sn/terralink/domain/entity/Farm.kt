@@ -36,6 +36,12 @@ class Farm(
     @Column(name = "status", nullable = false, length = 20)
     var status: FarmStatus = FarmStatus.ACTIVE,
 
+    @Column(name = "latitude")
+    var latitude: Double? = null,
+
+    @Column(name = "longitude")
+    var longitude: Double? = null,
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     var createdAt: OffsetDateTime? = null
